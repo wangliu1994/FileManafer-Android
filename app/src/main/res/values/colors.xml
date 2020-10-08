@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#5cc4f3</color>
+    <color name="colorPrimaryDark">#6c9cfe</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="colorTitle">#47086C</color>
+    <!--按压状态颜色-->
+    <color name="background_pressed">#E5E5E5</color>
+</resources>
