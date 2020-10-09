@@ -1,8 +1,10 @@
 package com.winnie.filemanager_android;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,23 +14,33 @@ import android.provider.MediaStore;
 import android.view.Display;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
     //圆通调用相机
-    private final static int REQUEST_CODE_CAMERA_YT = 100000;
+    private final static int REQUEST_CODE_CAMERA_YT = 10000;
+    //圆通申请权限
+    private final static int REQUEST_PERMISSION_YT = 10009;
+
     //极兔调用相机
-    private final static int REQUEST_CODE_CAMERA_JT= 200000;
+    private final static int REQUEST_CODE_CAMERA_JT = 20000;
+    //极兔申请权限
+    private final static int REQUEST_PERMISSION_JT = 20009;
+
     //圆通-type
     private final static int TYPE_YT = 1;
     //极兔-type
-    private final static int TYPE_JT= 2;
+    private final static int TYPE_JT = 2;
 
     private Uri photoUri;
 
@@ -88,23 +100,74 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.ll_yuan_tong_layout:
-                OnOpenCamera(1);
+                takePhotos(1);
                 break;
             case R.id.ll_ji_tu_layout:
-                OnOpenCamera(2);
+                takePhotos(2);
                 break;
             default:
                 break;
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION_YT) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //申请成功，可以拍照
+                openCamera(REQUEST_CODE_CAMERA_YT);
+            } else {
+                Toast.makeText(this, "CAMERA PERMISSION DENIED", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        if (requestCode == REQUEST_PERMISSION_JT) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //申请成功，可以拍照
+                openCamera(REQUEST_CODE_CAMERA_JT);
+            } else {
+                Toast.makeText(this, "CAMERA PERMISSION DENIED", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
     /**
      * 打开相机
      *
      * @param type 1：圆通 2：极兔
      */
-    private void OnOpenCamera(int type) {
+    private void takePhotos(int type) {
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            //申请权限，REQUEST_TAKE_PHOTO_PERMISSION是自定义的常量
+            int requestCode = 0;
+            if (type == TYPE_YT) {
+                requestCode = REQUEST_PERMISSION_YT;
+            }
+            if (type == TYPE_JT) {
+                requestCode = REQUEST_PERMISSION_JT;
+            }
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    requestCode);
+        } else {
+            //有权限，直接拍照
+            int requestCode = 0;
+            if (type == TYPE_YT) {
+                requestCode = REQUEST_CODE_CAMERA_YT;
+            }
+            if (type == TYPE_JT) {
+                requestCode = REQUEST_CODE_CAMERA_JT;
+            }
+            openCamera(requestCode);
+        }
+    }
+
+    /**
+     * 打开相机
+     */
+    private void openCamera(int requestCode) {
         //向  MediaStore.Images.Media.EXTERNAL_CONTENT_URI 插入一个数据，那么返回标识ID。
         //在完成拍照后，新的照片会以此处的photoUri命名. 其实就是指定了个文件名
         ContentValues values = new ContentValues();
@@ -114,13 +177,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, photoUri);
         //启动拍照的窗体。并注册 回调处理。
-        int requestCode = 0;
-        if(type == TYPE_YT){
-            requestCode = REQUEST_CODE_CAMERA_YT;
-        }
-        if(type == TYPE_JT){
-            requestCode = REQUEST_CODE_CAMERA_JT;
-        }
         startActivityForResult(intent, requestCode);
     }
 
