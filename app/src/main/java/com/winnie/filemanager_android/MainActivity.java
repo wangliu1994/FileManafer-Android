@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                     //获得图片
                     Bitmap bp = getBitMapFromPath(path);
                     actionImage.setImageBitmap(bp);
-                    System.out.println("YT获取到相机返回");
+                    System.out.println("YT获取到相机返回" + path);
                 }
                 cursor.close();
             }
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                     //获得图片
                     Bitmap bp = getBitMapFromPath(path);
                     actionImage.setImageBitmap(bp);
-                    System.out.println("JT获取到相机返回");
+                    System.out.println("JT获取到相机返回" + path);
                 }
                 cursor.close();
             }
