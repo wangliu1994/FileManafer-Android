@@ -14,7 +14,7 @@
         android:background="@drawable/bg_title_bar"
         android:gravity="center"
         android:text="@string/index_title_name"
-        android:textColor="@color/colorTitle"
+        android:textColor="@color/colorWhite"
         android:textSize="20dp" />
 
 
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:text="圆通速递"
-            android:textColor="@color/colorTitle"
+            android:textColor="@color/colorWhite"
             android:textSize="20dp" />
     </LinearLayout>
 
@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:text="极兔速递"
-            android:textColor="@color/colorTitle"
+            android:textColor="@color/colorWhite"
             android:textSize="20dp" />
     </LinearLayout>
 
