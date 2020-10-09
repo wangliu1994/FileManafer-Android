@@ -118,20 +118,24 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_PERMISSION_YT) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 1
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 //申请成功，可以拍照
                 openCamera(REQUEST_CODE_CAMERA_YT);
             } else {
-                Toast.makeText(this, "CAMERA PERMISSION DENIED", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "权限不足", Toast.LENGTH_SHORT).show();
             }
         }
 
         if (requestCode == REQUEST_PERMISSION_JT) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 1
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 //申请成功，可以拍照
                 openCamera(REQUEST_CODE_CAMERA_JT);
             } else {
-                Toast.makeText(this, "CAMERA PERMISSION DENIED", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "权限不足", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -166,10 +170,11 @@ public class MainActivity extends AppCompatActivity {
         boolean cameraPermission = ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         boolean storagePermission = ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
         if (cameraPermission && storagePermission) {
             return true;
         }
+
         int requestCode = 0;
         if (type == TYPE_YT) {
             requestCode = REQUEST_PERMISSION_YT;
@@ -177,11 +182,12 @@ public class MainActivity extends AppCompatActivity {
         if (type == TYPE_JT) {
             requestCode = REQUEST_PERMISSION_JT;
         }
-        ActivityCompat.requestPermissions(this,
-                new String[]{
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                requestCode);
+
+        String[] permissions =  new String[]{
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        ActivityCompat.requestPermissions(this, permissions, requestCode);
 
         return false;
     }
