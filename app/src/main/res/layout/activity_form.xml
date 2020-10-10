@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".MainActivity"
     android:divider="@color/colorGray"
+    android:orientation="vertical"
     android:showDividers="middle"
+    tools:context=".MainActivity"
     tools:ignore="SpUsage">
 
     <LinearLayout
@@ -38,18 +38,72 @@
 
     </LinearLayout>
 
-
     <ImageView
         android:id="@+id/action_image"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:scaleType="centerCrop"
+        android:layout_height="200dp"
+        android:layout_margin="5dp"
+        android:scaleType="centerInside"
         android:src="@drawable/bg_index" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@color/colorGray"
+        android:showDividers="middle">
+
+        <LinearLayout
+            android:id="@+id/ll_choose_camera"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="7dp">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_camera" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="拍照上传"
+                android:textSize="18dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_choose_photo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="7dp">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_photo" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="相册选图"
+                android:textSize="18dp" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/ll_number"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="70dp"
         android:elevation="2dp"
         android:gravity="center_vertical">
 
@@ -103,7 +157,7 @@
     <LinearLayout
         android:id="@+id/ll_date"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="70dp"
         android:elevation="2dp"
         android:gravity="center_vertical">
 
@@ -161,8 +215,8 @@
         android:layout_marginTop="17dp"
         android:layout_marginEnd="7dp"
         android:layout_marginBottom="5dp"
-        android:padding="15dp"
         android:background="@drawable/sl_home_menu_blue"
+        android:padding="13dp"
         android:text="确定提交"
         android:textColor="@color/colorWhite"
         android:textSize="20dp" />

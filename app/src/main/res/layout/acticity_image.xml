@@ -28,7 +28,7 @@
             android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="@string/index_title_name"
+            android:text="图片预览"
             android:textColor="@color/colorWhite"
             android:textSize="20dp"
             tools:ignore="SpUsage" />

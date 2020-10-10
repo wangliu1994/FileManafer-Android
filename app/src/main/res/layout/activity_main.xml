@@ -22,7 +22,7 @@
         android:id="@+id/action_image"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:scaleType="centerCrop"
+        android:scaleType="centerInside"
         android:src="@drawable/bg_index" />
 
     <LinearLayout
