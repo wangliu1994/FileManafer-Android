@@ -1,5 +1,6 @@
 package com.winnie.filemanager_android;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -44,7 +45,13 @@ public class FormActivity extends AppCompatActivity {
         mPhotoPath = getIntent().getStringExtra(Constant.KEY_PATH);
         mType = getIntent().getIntExtra(Constant.KEY_TYPE, -1);
 
-        actionImage.setImageBitmap(getBitMapFromPath(mPhotoPath));
+        actionImage.setImageBitmap(BitmapUtils.getBitMapFromPath(this, mPhotoPath));
+        actionImage.setOnClickListener(v -> {
+            Intent intent = new Intent(FormActivity.this, ImageActivity.class);
+            intent.putExtra(Constant.KEY_PATH, mPhotoPath);
+            intent.putExtra(Constant.KEY_TYPE, mType);
+            startActivity(intent);
+        });
         tvNumberContent.setText("未扫描快递单号");
         initDate( System.currentTimeMillis());
     }
@@ -80,37 +87,4 @@ public class FormActivity extends AppCompatActivity {
                 .format(new Date(date));
         tvDateContent.setText(dateString);
     }
-
-    /* 获得图片，并进行适当的 缩放。 图片太大的话，是无法展示的。 */
-    private Bitmap getBitMapFromPath(String imageFilePath) {
-        Display currentDisplay = getWindowManager().getDefaultDisplay();
-        int dw = currentDisplay.getWidth();
-        int dh = currentDisplay.getHeight();
-        // Load up the image's dimensions not the image itself
-        BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
-        bmpFactoryOptions.inJustDecodeBounds = true;
-        Bitmap bmp = BitmapFactory.decodeFile(imageFilePath,
-                bmpFactoryOptions);
-        int heightRatio = (int) Math.ceil(bmpFactoryOptions.outHeight
-                / (float) dh);
-        int widthRatio = (int) Math.ceil(bmpFactoryOptions.outWidth
-                / (float) dw);
-
-        // If both of the ratios are greater than 1,
-        // one of the sides of the image is greater than the screen
-        if (heightRatio > 1 && widthRatio > 1) {
-            if (heightRatio > widthRatio) {
-                // Height ratio is larger, scale according to it
-                bmpFactoryOptions.inSampleSize = heightRatio;
-            } else {
-                // Width ratio is larger, scale according to it
-                bmpFactoryOptions.inSampleSize = widthRatio;
-            }
-        }
-        // Decode it for real
-        bmpFactoryOptions.inJustDecodeBounds = false;
-        bmp = BitmapFactory.decodeFile(imageFilePath, bmpFactoryOptions);
-        return bmp;
-    }
-
 }

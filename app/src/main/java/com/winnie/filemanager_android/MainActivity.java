@@ -52,6 +52,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        actionImage.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ImageActivity.class);
+            startActivity(intent);
+        });
     }
 
     @Override
