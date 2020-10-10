@@ -1,4 +1,4 @@
-package com.winnie.filemanager_android.utils;
+package com.winnie.filemanager_android.common;
 
 import android.app.Activity;
 import android.content.ContentUris;

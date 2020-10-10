@@ -126,7 +126,7 @@
             android:baselineAligned="false"
             android:orientation="horizontal">
 
-            <com.winnie.filemanager_android.ClearEditText
+            <com.winnie.filemanager_android.view.ClearEditText
                 android:id="@+id/tv_number_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

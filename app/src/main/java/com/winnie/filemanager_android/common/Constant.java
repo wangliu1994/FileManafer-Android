@@ -1,4 +1,4 @@
-package com.winnie.filemanager_android;
+package com.winnie.filemanager_android.common;
 
 public class Constant {
     //圆通-type

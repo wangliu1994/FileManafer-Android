@@ -1,4 +1,4 @@
-package com.winnie.filemanager_android;
+package com.winnie.filemanager_android.view;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -6,6 +6,8 @@ import android.widget.CalendarView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+
+import com.winnie.filemanager_android.R;
 
 import java.util.Calendar;
 

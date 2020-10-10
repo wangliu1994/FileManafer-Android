@@ -22,7 +22,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.uuzuche.lib_zxing.activity.CodeUtils;
-import com.winnie.filemanager_android.utils.ImageUtils;
+import com.winnie.filemanager_android.common.Constant;
+import com.winnie.filemanager_android.common.ImageUtils;
+import com.winnie.filemanager_android.view.ClearEditText;
+import com.winnie.filemanager_android.view.DatePickerDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

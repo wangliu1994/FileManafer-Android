@@ -3,7 +3,8 @@ package com.winnie.filemanager_android;
 import android.os.Bundle;
 
 import com.github.chrisbanes.photoview.PhotoView;
-import com.winnie.filemanager_android.utils.ImageUtils;
+import com.winnie.filemanager_android.common.Constant;
+import com.winnie.filemanager_android.common.ImageUtils;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;

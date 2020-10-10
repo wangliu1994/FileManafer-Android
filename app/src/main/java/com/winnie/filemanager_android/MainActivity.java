@@ -8,6 +8,8 @@ import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.winnie.filemanager_android.common.Constant;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

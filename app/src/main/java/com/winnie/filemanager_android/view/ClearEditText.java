@@ -1,4 +1,4 @@
-package com.winnie.filemanager_android;
+package com.winnie.filemanager_android.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -15,6 +15,8 @@ import android.view.MotionEvent;
 
 
 import androidx.appcompat.widget.AppCompatEditText;
+
+import com.winnie.filemanager_android.R;
 
 /**
  *
