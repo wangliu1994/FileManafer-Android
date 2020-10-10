@@ -3,6 +3,7 @@ package com.winnie.filemanager_android;
 import android.os.Bundle;
 
 import com.github.chrisbanes.photoview.PhotoView;
+import com.winnie.filemanager_android.utils.ImageUtils;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,7 +34,7 @@ public class ImageActivity extends AppCompatActivity {
         mType = getIntent().getIntExtra(Constant.KEY_TYPE, -1);
 
         if (mPhotoPath == null) {
-            mPhotoPath = "/storage/emulated/0/Pictures/1602309669776.jpg";
+            return;
         }
         imageView.setImageBitmap(ImageUtils.getBitMapFromPath(this, mPhotoPath));
     }

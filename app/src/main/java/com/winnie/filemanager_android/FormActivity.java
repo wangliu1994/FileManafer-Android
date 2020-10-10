@@ -21,8 +21,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.uuzuche.lib_zxing.activity.CaptureActivity;
 import com.uuzuche.lib_zxing.activity.CodeUtils;
+import com.winnie.filemanager_android.utils.ImageUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -228,7 +228,6 @@ public class FormActivity extends AppCompatActivity {
         }
 
         actionImage.setImageBitmap(ImageUtils.getBitMapFromPath(this, mPhotoPath));
-
         ImageUtils.analyzeBitmap(mPhotoPath, new CodeUtils.AnalyzeCallback() {
             @Override
             public void onAnalyzeSuccess(Bitmap mBitmap, String result) {
