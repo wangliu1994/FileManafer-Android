@@ -3,19 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:divider="@color/colorGray"
+    android:orientation="vertical"
     android:showDividers="middle">
 
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="选择日期"
-        android:padding="10dp"
         android:gravity="center"
+        android:padding="10dp"
+        android:text="选择日期"
         android:textColor="@color/colorBlack"
         android:textSize="20dp"
+        android:visibility="gone"
         tools:ignore="SpUsage" />
 
 

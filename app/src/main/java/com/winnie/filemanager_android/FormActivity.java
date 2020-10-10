@@ -1,13 +1,13 @@
 package com.winnie.filemanager_android;
 
 import android.Manifest;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +20,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.uuzuche.lib_zxing.activity.CaptureActivity;
+import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,7 +47,7 @@ public class FormActivity extends AppCompatActivity {
     //调用相机
     private final static int REQUEST_CODE_CAMERA = 10000;
     //调用相册
-    private final static int REQUEST_CODE_PHOTO = 20000;
+    private final static int REQUEST_CODE_ALBUM = 20000;
     //申请权限
     private final static int REQUEST_PERMISSION = 9999;
 
@@ -64,28 +67,34 @@ public class FormActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         mType = getIntent().getIntExtra(Constant.KEY_TYPE, -1);
-        if(mType == Constant.TYPE_YT){
+        if (mType == Constant.TYPE_YT) {
             titleBar.setText("圆通面单归档");
-        }else if(mType == Constant.TYPE_JT){
+        } else if (mType == Constant.TYPE_JT) {
             titleBar.setText("极兔面单归档");
-        }else {
+        } else {
             Toast.makeText(this, "快递类型不支持", Toast.LENGTH_LONG).show();
             finish();
         }
-
-        tvNumberContent.setText("未扫描快递单号");
         initDate(System.currentTimeMillis());
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_CAMERA && resultCode == AppCompatActivity.RESULT_OK) {
-            onGetPhoto();
-        }
+        if (resultCode == AppCompatActivity.RESULT_OK) {
+            if (requestCode == REQUEST_CODE_CAMERA) {
+                mPhotoPath = ImageUtils.getImagePath(this, photoUri);
+                photoUri = null;
+                onGetPhoto();
+            }
 
-        if (requestCode == REQUEST_CODE_PHOTO && resultCode == AppCompatActivity.RESULT_OK) {
-//            onGetPhoto(Constant.TYPE_JT);
+            if (requestCode == REQUEST_CODE_ALBUM) {
+                if (data != null) {
+                    Uri address = data.getData();
+                    mPhotoPath = ImageUtils.getImagePath(this, address);
+                    onGetPhoto();
+                }
+            }
         }
     }
 
@@ -118,6 +127,21 @@ public class FormActivity extends AppCompatActivity {
             case R.id.ic_back:
                 finish();
                 break;
+            case R.id.ll_choose_camera:
+                //相机拍照
+                useCamera();
+                break;
+            case R.id.ll_choose_photo:
+                //相册选图
+                useAlbum();
+                break;
+            case R.id.action_image:
+                //大图预览
+                Intent intent = new Intent(FormActivity.this, ImageActivity.class);
+                intent.putExtra(Constant.KEY_PATH, mPhotoPath);
+                intent.putExtra(Constant.KEY_TYPE, mType);
+                startActivity(intent);
+                break;
             case R.id.ll_date:
                 //选择到件日期
                 if (datePickerDialog == null) {
@@ -128,19 +152,6 @@ public class FormActivity extends AppCompatActivity {
                 break;
             case R.id.btn_confirm:
                 Toast.makeText(this, "确定提交吗？", Toast.LENGTH_LONG).show();
-                break;
-            case R.id.action_image:
-                //大图预览
-                Intent intent = new Intent(FormActivity.this, ImageActivity.class);
-                intent.putExtra(Constant.KEY_PATH, mPhotoPath);
-                intent.putExtra(Constant.KEY_TYPE, mType);
-                startActivity(intent);
-                break;
-            case R.id.ll_choose_camera:
-                //相机拍照
-                takePhotos();
-                break;
-            case R.id.ll_choose_photo:
                 break;
             default:
                 break;
@@ -157,11 +168,20 @@ public class FormActivity extends AppCompatActivity {
     /**
      * 打开相机
      */
-    private void takePhotos() {
+    private void useCamera() {
         if (checkPermission()) {
             //有权限，直接拍照
             openCamera();
         }
+    }
+
+    /**
+     * 打开相册
+     */
+    private void useAlbum() {
+        Intent intent = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, REQUEST_CODE_ALBUM);
     }
 
     /**
@@ -202,28 +222,32 @@ public class FormActivity extends AppCompatActivity {
         startActivityForResult(intent, REQUEST_CODE_CAMERA);
     }
 
-
-    /**
-     * 相机拍照之后返回--获取照片
-     */
-    private void onGetPhoto() {
-        ContentResolver cr = getContentResolver();
-        if (photoUri == null)
-            return;
-        //按 刚刚指定 的那个文件名，查询数据库，获得更多的 照片信息，比如 图片的物理绝对路径
-        Cursor cursor = cr.query(photoUri, null, null, null, null);
-        if (cursor != null) {
-            if (cursor.moveToNext()) {
-                mPhotoPath = cursor.getString(1);
-                System.out.println("获取到相机返回" + mPhotoPath);
-            }
-            cursor.close();
-        }
-        photoUri = null;
-
+    private void onGetPhoto(){
         if (mPhotoPath == null) {
             Toast.makeText(this, "没有获取到图片，请稍后重试", Toast.LENGTH_LONG).show();
         }
-        actionImage.setImageBitmap(BitmapUtils.getBitMapFromPath(this, mPhotoPath));
+
+        actionImage.setImageBitmap(ImageUtils.getBitMapFromPath(this, mPhotoPath));
+
+        ImageUtils.analyzeBitmap(mPhotoPath, new CodeUtils.AnalyzeCallback() {
+            @Override
+            public void onAnalyzeSuccess(Bitmap mBitmap, String result) {
+
+                Vibrator vibrator;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                    vibrator.vibrate(200L);
+                }
+
+               tvNumberContent.setText(result);
+            }
+
+            @Override
+            public void onAnalyzeFailed() {
+                tvNumberContent.setText("");
+                Toast.makeText(FormActivity.this, "解析二维码失败，请稍后重试", Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 }

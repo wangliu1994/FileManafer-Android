@@ -35,7 +35,7 @@ public class ImageActivity extends AppCompatActivity {
         if (mPhotoPath == null) {
             mPhotoPath = "/storage/emulated/0/Pictures/1602309669776.jpg";
         }
-        imageView.setImageBitmap(BitmapUtils.getBitMapFromPath(this, mPhotoPath));
+        imageView.setImageBitmap(ImageUtils.getBitMapFromPath(this, mPhotoPath));
     }
 
     @OnClick(R.id.ic_back)
