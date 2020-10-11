@@ -32,6 +32,9 @@
             android:name=".SettingActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden" />
+        <activity
+            android:name=".scan.CaptureActivity"
+            android:screenOrientation="portrait" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

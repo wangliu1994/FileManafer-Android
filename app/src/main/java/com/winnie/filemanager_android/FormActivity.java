@@ -13,16 +13,21 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.uuzuche.lib_zxing.DisplayUtil;
+import com.uuzuche.lib_zxing.activity.CaptureActivity;
 import com.uuzuche.lib_zxing.activity.CodeUtils;
+import com.uuzuche.lib_zxing.camera.CameraManager;
 import com.winnie.filemanager_android.base.BaseActivity;
 import com.winnie.filemanager_android.common.Constant;
 import com.winnie.filemanager_android.common.ImageUtils;
@@ -67,8 +72,32 @@ public class FormActivity extends BaseActivity {
     private final static int REQUEST_CODE_CAMERA = 10000;
     //调用相册
     private final static int REQUEST_CODE_ALBUM = 20000;
-    //申请权限
-    private final static int REQUEST_PERMISSION = 9999;
+    //调用扫码页面
+    private final static int REQUEST_CODE_SCAN = 30000;
+    //申请相机权限
+    private final static int REQUEST_PERMISSION_CAMERA = 9991;
+    //申请相册权限
+    private final static int REQUEST_PERMISSION_ALBUM = 9992;
+    //申请扫码权限
+    private final static int REQUEST_PERMISSION_SCAN = 9993;
+    @BindView(R.id.ic_back)
+    AppCompatImageView mIcBack;
+    @BindView(R.id.ll_choose_camera)
+    LinearLayout mLlChooseCamera;
+    @BindView(R.id.ll_choose_photo)
+    LinearLayout mLlChoosePhoto;
+    @BindView(R.id.tv_number_title)
+    TextView mTvNumberTitle;
+    @BindView(R.id.ic_scan)
+    ImageView mIcScan;
+    @BindView(R.id.ll_number)
+    LinearLayout mLlNumber;
+    @BindView(R.id.tv_date_title)
+    TextView mTvDateTitle;
+    @BindView(R.id.date_arrow)
+    View mDateArrow;
+    @BindView(R.id.ll_date)
+    LinearLayout mLlDate;
 
 
     private DatePickerDialog mDatePickerDialog;
@@ -113,18 +142,52 @@ public class FormActivity extends BaseActivity {
                     onGetPhoto();
                 }
             }
+            //处理二维码扫描结果
+            if (requestCode == REQUEST_CODE_SCAN) {
+                //处理扫描结果（在界面上显示）
+                if (null != data) {
+                    Bundle bundle = data.getExtras();
+                    if (bundle == null) {
+                        return;
+                    }
+                    if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
+                        String result = bundle.getString(CodeUtils.RESULT_STRING);
+                        mTvNumberContent.setText(result);
+                    } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
+                        Toast.makeText(FormActivity.this, "解析二维码失败", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_PERMISSION) {
+        if (requestCode == REQUEST_PERMISSION_CAMERA) {
             if (grantResults.length > 1
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 //申请成功，可以拍照
                 openCamera();
+            } else {
+                Toast.makeText(this, "权限不足", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        if (requestCode == REQUEST_PERMISSION_ALBUM) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openAlbum();
+            } else {
+                Toast.makeText(this, "权限不足", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        if (requestCode == REQUEST_PERMISSION_SCAN) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openScan();
             } else {
                 Toast.makeText(this, "权限不足", Toast.LENGTH_SHORT).show();
             }
@@ -138,7 +201,8 @@ public class FormActivity extends BaseActivity {
             R.id.btn_confirm,
             R.id.action_image,
             R.id.ll_choose_camera,
-            R.id.ll_choose_photo
+            R.id.ll_choose_photo,
+            R.id.ic_scan
     })
     public void onClick(View view) {
         switch (view.getId()) {
@@ -171,6 +235,10 @@ public class FormActivity extends BaseActivity {
             case R.id.btn_confirm:
                 uploadFile();
                 break;
+            case R.id.ic_scan:
+                //直接扫码
+                useScan();
+                break;
             default:
                 break;
         }
@@ -186,7 +254,7 @@ public class FormActivity extends BaseActivity {
      * 打开相机
      */
     private void useCamera() {
-        if (checkPermission()) {
+        if (checkCameraPermission()) {
             //有权限，直接拍照
             openCamera();
         }
@@ -196,9 +264,16 @@ public class FormActivity extends BaseActivity {
      * 打开相册
      */
     private void useAlbum() {
-        Intent intent = new Intent(Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, REQUEST_CODE_ALBUM);
+        if (checkAlbumPermission()) {
+            openAlbum();
+        }
+
+    }
+
+    private void useScan() {
+        if (checkScanPermission()) {
+            openScan();
+        }
     }
 
     /**
@@ -206,7 +281,7 @@ public class FormActivity extends BaseActivity {
      *
      * @return 有权限
      */
-    private boolean checkPermission() {
+    private boolean checkCameraPermission() {
         boolean cameraPermission = ContextCompat.checkSelfPermission(FormActivity.this,
                 Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         boolean storagePermission = ContextCompat.checkSelfPermission(FormActivity.this,
@@ -218,7 +293,35 @@ public class FormActivity extends BaseActivity {
                 Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSION);
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSION_CAMERA);
+
+        return false;
+    }
+
+    private boolean checkAlbumPermission() {
+        boolean storagePermission = ContextCompat.checkSelfPermission(FormActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        if (storagePermission) {
+            return true;
+        }
+        String[] permissions = new String[]{
+                Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSION_ALBUM);
+
+        return false;
+    }
+
+    private boolean checkScanPermission() {
+        boolean storagePermission = ContextCompat.checkSelfPermission(FormActivity.this,
+                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        if (storagePermission) {
+            return true;
+        }
+        String[] permissions = new String[]{
+                Manifest.permission.CAMERA};
+
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSION_SCAN);
 
         return false;
     }
@@ -239,6 +342,17 @@ public class FormActivity extends BaseActivity {
         startActivityForResult(intent, REQUEST_CODE_CAMERA);
     }
 
+    private void openAlbum() {
+        Intent intent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, REQUEST_CODE_ALBUM);
+    }
+
+    private void openScan() {
+        Intent scanIntent = new Intent(FormActivity.this, CaptureActivity.class);
+        startActivityForResult(scanIntent, REQUEST_CODE_SCAN);
+    }
+
     private void onGetPhoto() {
         if (mPhotoPath == null) {
             Toast.makeText(this, "没有获取到图片，请稍后重试", Toast.LENGTH_LONG).show();
@@ -254,7 +368,6 @@ public class FormActivity extends BaseActivity {
                     vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
                     vibrator.vibrate(200L);
                 }
-
                 mTvNumberContent.setText(result);
             }
 
@@ -280,71 +393,78 @@ public class FormActivity extends BaseActivity {
         if (mDatePickerDialog != null) {
             date = mDatePickerDialog.getCurrentTime();
         }
-        if (mPhotoPath != null && mPhotoPath.length() > 0) {
-            Map<String, RequestBody> map = new HashMap<>(4);
 
-            File file = new File(mPhotoPath);
-            RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-            map.put("file\"; filename=\"" + file.getName(), requestFile);
-            ApiClient
-                    .getService()
-                    .uploadFile(map, mType, number, date)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<Response<Result<FileUploadResDTO>>>() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
-                            showWaitingDialog();
-                        }
-
-                        @Override
-                        public void onNext(Response<Result<FileUploadResDTO>> response) {
-                            if (response == null || response.body() == null) {
-                                Toast.makeText(
-                                        FormActivity.this,
-                                        "文件上传失败", Toast.LENGTH_SHORT)
-                                        .show();
-                                return;
-                            }
-
-                            Result<FileUploadResDTO> result = response.body();
-                            if (result.getData() == null) {
-                                Toast.makeText(FormActivity.this,
-                                        "文件上传失败:" + result.getErrorMessage(),
-                                        Toast.LENGTH_SHORT)
-                                        .show();
-                                return;
-                            }
-
-                            String resultPath = result.getData().getFilePath();
-                            String content = "文件已成功上传至：" + resultPath;
-                            InformationDialog dialog = new InformationDialog(FormActivity.this, content);
-                            dialog.setOnClickListener(v -> {
-                                mActionImage.setImageResource(R.drawable.bg_index);
-                                mTvNumberContent.setText("");
-                                initDate(System.currentTimeMillis());
-                            });
-                            dialog.show();
-
-                            Toast.makeText(FormActivity.this,
-                                    resultPath, Toast.LENGTH_SHORT)
-                                    .show();
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Toast.makeText(FormActivity.this,
-                                    "文件上传失败:", Toast.LENGTH_SHORT)
-                                    .show();
-                            hideWaitingDialog();
-                        }
-
-                        @Override
-                        public void onComplete() {
-                            hideWaitingDialog();
-                        }
-                    });
+        if (mPhotoPath == null || mPhotoPath.length() == 0) {
+            Toast.makeText(
+                    FormActivity.this,
+                    "请先拍照或者选择照片", Toast.LENGTH_SHORT)
+                    .show();
+            return;
         }
+
+        Map<String, RequestBody> map = new HashMap<>(4);
+
+        File file = new File(mPhotoPath);
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        map.put("file\"; filename=\"" + file.getName(), requestFile);
+        ApiClient
+                .getService()
+                .uploadFile(map, mType, number, date)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Response<Result<FileUploadResDTO>>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        showWaitingDialog();
+                    }
+
+                    @Override
+                    public void onNext(Response<Result<FileUploadResDTO>> response) {
+                        if (response == null || response.body() == null) {
+                            Toast.makeText(
+                                    FormActivity.this,
+                                    "文件上传失败", Toast.LENGTH_SHORT)
+                                    .show();
+                            return;
+                        }
+
+                        Result<FileUploadResDTO> result = response.body();
+                        if (result.getData() == null) {
+                            Toast.makeText(FormActivity.this,
+                                    "文件上传失败:" + result.getErrorMessage(),
+                                    Toast.LENGTH_SHORT)
+                                    .show();
+                            return;
+                        }
+
+                        String resultPath = result.getData().getFilePath();
+                        String content = "文件已成功上传至：" + resultPath;
+                        InformationDialog dialog = new InformationDialog(FormActivity.this, content);
+                        dialog.setOnClickListener(v -> {
+                            mActionImage.setImageResource(R.drawable.bg_index);
+                            mTvNumberContent.setText("");
+                            initDate(System.currentTimeMillis());
+                        });
+                        dialog.show();
+
+                        Toast.makeText(FormActivity.this,
+                                resultPath, Toast.LENGTH_SHORT)
+                                .show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(FormActivity.this,
+                                "文件上传失败:", Toast.LENGTH_SHORT)
+                                .show();
+                        hideWaitingDialog();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        hideWaitingDialog();
+                    }
+                });
 
     }
 }
