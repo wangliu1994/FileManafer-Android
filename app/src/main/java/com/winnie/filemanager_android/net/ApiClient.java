@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.winnie.filemanager_android.BaseApplication;
+import com.winnie.filemanager_android.BuildConfig;
 import com.winnie.filemanager_android.common.Constant;
 
 import retrofit2.Retrofit;
@@ -24,7 +25,7 @@ public final class ApiClient {
             if (sHost == null) {
                 SharedPreferences sp = BaseApplication.getContext()
                         .getSharedPreferences(Constant.SYSTEM_CONFIG_KEY, Context.MODE_PRIVATE);
-                String host = sp.getString(Constant.SP_FILE_SERVER_HOST, "192.168.0.8:12000");
+                String host = sp.getString(Constant.SP_FILE_SERVER_HOST, BuildConfig.HOST);
                 sHost = "http://" + host;
             }
             Retrofit retrofit = new Retrofit.Builder()

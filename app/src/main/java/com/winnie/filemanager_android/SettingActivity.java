@@ -61,7 +61,7 @@ public class SettingActivity extends BaseActivity {
 
     private void getHost() {
         SharedPreferences sp = getSharedPreferences(Constant.SYSTEM_CONFIG_KEY, Context.MODE_PRIVATE);
-        String host = sp.getString(Constant.SP_FILE_SERVER_HOST, "192.168.0.8:12000");
+        String host = sp.getString(Constant.SP_FILE_SERVER_HOST, BuildConfig.HOST);
         if (host == null) {
             return;
         }
