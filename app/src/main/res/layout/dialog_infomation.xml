@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorWhite"
+    android:divider="@color/colorGray"
+    android:orientation="vertical"
+    android:showDividers="middle"
+    tools:ignore="SpUsage">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="13dp"
+        android:text="提示"
+        android:textColor="@color/colorBlack"
+        android:textSize="20dp"
+        tools:ignore="SpUsage" />
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:padding="10dp"
+        android:text="提示内容"
+        android:textColor="@color/colorBlack"
+        android:textSize="16dp"
+        tools:ignore="SpUsage" />
+
+    <Button
+        android:id="@+id/btn_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/sl_dialog_button"
+        android:padding="12dp"
+        android:text="确定"
+        android:textColor="@color/colorBlack"
+        android:textSize="18dp" />
+
+</LinearLayout>

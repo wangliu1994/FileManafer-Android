@@ -2,12 +2,13 @@ package com.winnie.filemanager_android;
 
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
+
 import com.github.chrisbanes.photoview.PhotoView;
+import com.winnie.filemanager_android.base.BaseActivity;
 import com.winnie.filemanager_android.common.Constant;
 import com.winnie.filemanager_android.common.ImageUtils;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -17,7 +18,7 @@ import butterknife.OnClick;
  * @date : 2020/10/10
  * @desc
  */
-public class ImageActivity extends AppCompatActivity {
+public class ImageActivity extends BaseActivity {
 
     @BindView(R.id.image_view)
     PhotoView imageView;

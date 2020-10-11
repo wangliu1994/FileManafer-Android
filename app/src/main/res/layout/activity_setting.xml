@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:ignore="SpUsage">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nav_bar_height"
+        android:background="@drawable/bg_title_bar">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ic_back"
+            android:layout_width="56dp"
+            android:layout_height="match_parent"
+            android:padding="15dp"
+            android:src="@drawable/ic_back_white" />
+
+        <TextView
+            android:id="@+id/title_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/index_title_name"
+            android:textColor="@color/colorWhite"
+            android:textSize="20dp" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="56dp"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="10dp"
+        android:paddingEnd="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp"
+            android:text="IP地址"
+            android:textColor="#333333"
+            android:textSize="16dp" />
+
+        <com.winnie.filemanager_android.view.ClearEditText
+            android:id="@+id/edit_IP"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/sl_input_text"
+            android:gravity="end"
+            android:hint="请输入IP地址"
+            android:maxLength="15"
+            android:maxLines="1"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp"
+            android:textColor="#333333"
+            android:textColorHint="#d8d8d8"
+            android:textSize="16dp"
+            android:singleLine="true"
+            android:imeOptions="actionNext"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="10dp"
+        android:paddingEnd="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp"
+            android:text="端口号"
+            android:textColor="#333333"
+            android:textSize="16dp" />
+
+        <com.winnie.filemanager_android.view.ClearEditText
+            android:id="@+id/edit_Port"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/sl_input_text"
+            android:hint="请输入端口号"
+            android:gravity="end"
+            android:maxLength="5"
+            android:maxLines="1"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp"
+            android:textColor="#333333"
+            android:textColorHint="#d8d8d8"
+            android:textSize="16dp"
+            android:inputType="number"
+            android:singleLine="true"
+            android:imeOptions="actionDone"/>
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/btn_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="17dp"
+        android:layout_marginEnd="7dp"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/sl_home_menu_blue"
+        android:padding="13dp"
+        android:text="确定"
+        android:textColor="@color/colorWhite"
+        android:textSize="20dp" />
+
+</LinearLayout>

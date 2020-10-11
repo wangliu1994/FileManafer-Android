@@ -62,6 +62,10 @@ public class DatePickerDialog extends Dialog {
         initDate();
     }
 
+    public Long getCurrentTime() {
+        return mCurrentTime;
+    }
+
     public void setTitle(String title) {
         mTitle.setText(title);
     }

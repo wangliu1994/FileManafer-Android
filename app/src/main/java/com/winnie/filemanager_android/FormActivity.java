@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.MediaStore;
@@ -22,30 +23,45 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.uuzuche.lib_zxing.activity.CodeUtils;
+import com.winnie.filemanager_android.base.BaseActivity;
 import com.winnie.filemanager_android.common.Constant;
 import com.winnie.filemanager_android.common.ImageUtils;
+import com.winnie.filemanager_android.common.Result;
+import com.winnie.filemanager_android.model.FileUploadResDTO;
+import com.winnie.filemanager_android.net.ApiClient;
 import com.winnie.filemanager_android.view.ClearEditText;
 import com.winnie.filemanager_android.view.DatePickerDialog;
+import com.winnie.filemanager_android.view.InformationDialog;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Response;
 
-public class FormActivity extends AppCompatActivity {
+public class FormActivity extends BaseActivity {
     @BindView(R.id.action_image)
-    ImageView actionImage;
+    ImageView mActionImage;
     @BindView(R.id.tv_number_content)
-    ClearEditText tvNumberContent;
+    ClearEditText mTvNumberContent;
     @BindView(R.id.tv_date_content)
-    TextView tvDateContent;
+    TextView mTvDateContent;
     @BindView(R.id.title_bar)
-    TextView titleBar;
+    TextView mTitleBar;
     @BindView(R.id.btn_confirm)
-    Button btnConfirm;
+    Button mBtnConfirm;
 
     //调用相机
     private final static int REQUEST_CODE_CAMERA = 10000;
@@ -55,13 +71,12 @@ public class FormActivity extends AppCompatActivity {
     private final static int REQUEST_PERMISSION = 9999;
 
 
-    private DatePickerDialog datePickerDialog;
+    private DatePickerDialog mDatePickerDialog;
 
     private Uri photoUri;
 
     private String mPhotoPath;
     private int mType;
-    private Long mDate;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,9 +86,9 @@ public class FormActivity extends AppCompatActivity {
 
         mType = getIntent().getIntExtra(Constant.KEY_TYPE, -1);
         if (mType == Constant.TYPE_YT) {
-            titleBar.setText("圆通面单归档");
+            mTitleBar.setText("圆通面单归档");
         } else if (mType == Constant.TYPE_JT) {
-            titleBar.setText("极兔面单归档");
+            mTitleBar.setText("极兔面单归档");
         } else {
             Toast.makeText(this, "快递类型不支持", Toast.LENGTH_LONG).show();
             finish();
@@ -147,14 +162,14 @@ public class FormActivity extends AppCompatActivity {
                 break;
             case R.id.ll_date:
                 //选择到件日期
-                if (datePickerDialog == null) {
-                    datePickerDialog = new DatePickerDialog(this, mDate);
+                if (mDatePickerDialog == null) {
+                    mDatePickerDialog = new DatePickerDialog(this, null);
                 }
-                datePickerDialog.setSelectListener(this::initDate);
-                datePickerDialog.show();
+                mDatePickerDialog.setSelectListener(this::initDate);
+                mDatePickerDialog.show();
                 break;
             case R.id.btn_confirm:
-                Toast.makeText(this, "确定提交吗？", Toast.LENGTH_LONG).show();
+                uploadFile();
                 break;
             default:
                 break;
@@ -162,10 +177,9 @@ public class FormActivity extends AppCompatActivity {
     }
 
     private void initDate(long date) {
-        mDate = date;
         String dateString = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 .format(new Date(date));
-        tvDateContent.setText(dateString);
+        mTvDateContent.setText(dateString);
     }
 
     /**
@@ -183,7 +197,7 @@ public class FormActivity extends AppCompatActivity {
      */
     private void useAlbum() {
         Intent intent = new Intent(Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, REQUEST_CODE_ALBUM);
     }
 
@@ -225,31 +239,112 @@ public class FormActivity extends AppCompatActivity {
         startActivityForResult(intent, REQUEST_CODE_CAMERA);
     }
 
-    private void onGetPhoto(){
+    private void onGetPhoto() {
         if (mPhotoPath == null) {
             Toast.makeText(this, "没有获取到图片，请稍后重试", Toast.LENGTH_LONG).show();
         }
 
-        actionImage.setImageBitmap(ImageUtils.getBitMapFromPath(this, mPhotoPath));
+        mActionImage.setImageBitmap(ImageUtils.getBitMapFromPath(this, mPhotoPath));
         ImageUtils.analyzeBitmap(mPhotoPath, new CodeUtils.AnalyzeCallback() {
             @Override
             public void onAnalyzeSuccess(Bitmap mBitmap, String result) {
 
                 Vibrator vibrator;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
                     vibrator.vibrate(200L);
                 }
 
-               tvNumberContent.setText(result);
+                mTvNumberContent.setText(result);
             }
 
             @Override
             public void onAnalyzeFailed() {
-                tvNumberContent.setText("");
+                mTvNumberContent.setText("");
                 Toast.makeText(FormActivity.this, "解析二维码失败，请稍后重试", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+
+    /**
+     * 上传文件
+     */
+    private void uploadFile() {
+        String number = null;
+        if (mTvNumberContent.getText() != null) {
+            number = mTvNumberContent.getText().toString();
+        }
+
+        Long date = System.currentTimeMillis();
+        if (mDatePickerDialog != null) {
+            date = mDatePickerDialog.getCurrentTime();
+        }
+        if (mPhotoPath != null && mPhotoPath.length() > 0) {
+            Map<String, RequestBody> map = new HashMap<>(4);
+
+            File file = new File(mPhotoPath);
+            RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+            map.put("file\"; filename=\"" + file.getName(), requestFile);
+            ApiClient
+                    .getService()
+                    .uploadFile(map, mType, number, date)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Response<Result<FileUploadResDTO>>>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                            showWaitingDialog();
+                        }
+
+                        @Override
+                        public void onNext(Response<Result<FileUploadResDTO>> response) {
+                            if (response == null || response.body() == null) {
+                                Toast.makeText(
+                                        FormActivity.this,
+                                        "文件上传失败", Toast.LENGTH_SHORT)
+                                        .show();
+                                return;
+                            }
+
+                            Result<FileUploadResDTO> result = response.body();
+                            if (result.getData() == null) {
+                                Toast.makeText(FormActivity.this,
+                                        "文件上传失败:" + result.getErrorMessage(),
+                                        Toast.LENGTH_SHORT)
+                                        .show();
+                                return;
+                            }
+
+                            String resultPath = result.getData().getFilePath();
+                            String content = "文件已成功上传至：" + resultPath;
+                            InformationDialog dialog = new InformationDialog(FormActivity.this, content);
+                            dialog.setOnClickListener(v -> {
+                                mActionImage.setImageResource(R.drawable.bg_index);
+                                mTvNumberContent.setText("");
+                                initDate(System.currentTimeMillis());
+                            });
+                            dialog.show();
+
+                            Toast.makeText(FormActivity.this,
+                                    resultPath, Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Toast.makeText(FormActivity.this,
+                                    "文件上传失败:", Toast.LENGTH_SHORT)
+                                    .show();
+                            hideWaitingDialog();
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            hideWaitingDialog();
+                        }
+                    });
+        }
 
     }
 }
