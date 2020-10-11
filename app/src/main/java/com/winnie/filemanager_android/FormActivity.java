@@ -24,10 +24,8 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.uuzuche.lib_zxing.DisplayUtil;
 import com.uuzuche.lib_zxing.activity.CaptureActivity;
 import com.uuzuche.lib_zxing.activity.CodeUtils;
-import com.uuzuche.lib_zxing.camera.CameraManager;
 import com.winnie.filemanager_android.base.BaseActivity;
 import com.winnie.filemanager_android.common.Constant;
 import com.winnie.filemanager_android.common.ImageUtils;
