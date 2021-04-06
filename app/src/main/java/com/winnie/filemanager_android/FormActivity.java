@@ -231,10 +231,6 @@ public class FormActivity extends BaseActivity {
                 break;
             case R.id.ll_date:
                 //选择到件日期
-                if (mDatePickerDialog == null) {
-                    mDatePickerDialog = new DatePickerDialog(this, null);
-                }
-                mDatePickerDialog.setSelectListener(this::initViewAndData);
                 mDatePickerDialog.show();
                 break;
             case R.id.btn_confirm:
@@ -254,9 +250,9 @@ public class FormActivity extends BaseActivity {
 
     private void initViewAndData(long date) {
         updateFormType();
-        String dateString = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                .format(new Date(date));
-        mTvDateContent.setText(dateString);
+        initDate(date);
+        mDatePickerDialog = new DatePickerDialog(this, date);
+        mDatePickerDialog.setSelectListener(this::initDate);
         mRgTypeLayout.setOnCheckedChangeListener((group, checkedId) -> {
             if(checkedId == R.id.rb_yt_btn){
                 mType = Constant.TYPE_YT;
@@ -292,6 +288,11 @@ public class FormActivity extends BaseActivity {
         });
     }
 
+    private void initDate(long date) {
+        String dateString = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                .format(new Date(date));
+        mTvDateContent.setText(dateString);
+    }
 
     private void updateFormType(){
         if (mType == Constant.TYPE_YT) {
@@ -443,18 +444,16 @@ public class FormActivity extends BaseActivity {
         String number = null;
         if (mTvNumberContent.getText() != null) {
             number = mTvNumberContent.getText().toString();
-        }else {
+        }
+        if (number == null || number.length() == 0) {
             Toast.makeText(
                     FormActivity.this,
                     "请输入运单号", Toast.LENGTH_SHORT)
                     .show();
+            return;
         }
 
-        Long date = System.currentTimeMillis();
-        if (mDatePickerDialog != null) {
-            date = mDatePickerDialog.getCurrentTime();
-        }
-
+        Long date = mDatePickerDialog.getCurrentTime();
         if (mPhotoPath == null || mPhotoPath.length() == 0) {
             Toast.makeText(
                     FormActivity.this,
@@ -502,9 +501,9 @@ public class FormActivity extends BaseActivity {
                         String content = "文件已成功上传至：" + resultPath;
                         InformationDialog dialog = new InformationDialog(FormActivity.this, content);
                         dialog.setOnClickListener(v -> {
+                            mPhotoPath = null;
                             mActionImage.setImageResource(R.drawable.bg_index);
                             mTvNumberContent.setText("");
-                            mPhotoPath = null;
                             initViewAndData(System.currentTimeMillis()-24*60*60*1000);
                         });
                         dialog.show();

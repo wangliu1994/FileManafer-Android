@@ -31,9 +31,6 @@ public class DatePickerDialog extends Dialog {
     public DatePickerDialog(@NonNull Context context, Long currentTime) {
         super(context);
         mCurrentTime = currentTime;
-        if(mCurrentTime == null) {
-            mCurrentTime = System.currentTimeMillis();
-        }
         setCancelable(true);
         setCanceledOnTouchOutside(true);
         setContentView(R.layout.dialog_date_picker);
