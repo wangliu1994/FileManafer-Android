@@ -10,10 +10,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -96,6 +100,12 @@ public class FormActivity extends BaseActivity {
     View mDateArrow;
     @BindView(R.id.ll_date)
     LinearLayout mLlDate;
+    @BindView(R.id.rb_yt_btn)
+    RadioButton mRbYtBtn;
+    @BindView(R.id.rb_jt_btn)
+    RadioButton mRbJtBtn;
+    @BindView(R.id.rg_type_layout)
+    RadioGroup mRgTypeLayout;
 
 
     private DatePickerDialog mDatePickerDialog;
@@ -111,16 +121,8 @@ public class FormActivity extends BaseActivity {
         setContentView(R.layout.activity_form);
         ButterKnife.bind(this);
 
-        mType = getIntent().getIntExtra(Constant.KEY_TYPE, -1);
-        if (mType == Constant.TYPE_YT) {
-            mTitleBar.setText("圆通面单归档");
-        } else if (mType == Constant.TYPE_JT) {
-            mTitleBar.setText("极兔面单归档");
-        } else {
-            Toast.makeText(this, "快递类型不支持", Toast.LENGTH_LONG).show();
-            finish();
-        }
-        initDate(System.currentTimeMillis());
+        mType = getIntent().getIntExtra(Constant.KEY_TYPE, Constant.TYPE_YT);
+        initViewAndData(System.currentTimeMillis()-24*60*60*1000);
     }
 
     @Override
@@ -200,7 +202,8 @@ public class FormActivity extends BaseActivity {
             R.id.action_image,
             R.id.ll_choose_camera,
             R.id.ll_choose_photo,
-            R.id.ic_scan
+            R.id.ic_scan,
+            R.id.ic_setting
     })
     public void onClick(View view) {
         switch (view.getId()) {
@@ -216,6 +219,10 @@ public class FormActivity extends BaseActivity {
                 useAlbum();
                 break;
             case R.id.action_image:
+                if(mPhotoPath == null){
+                    Toast.makeText(FormActivity.this, "欢迎使用面单归档助手", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 //大图预览
                 Intent intent = new Intent(FormActivity.this, ImageActivity.class);
                 intent.putExtra(Constant.KEY_PATH, mPhotoPath);
@@ -227,7 +234,7 @@ public class FormActivity extends BaseActivity {
                 if (mDatePickerDialog == null) {
                     mDatePickerDialog = new DatePickerDialog(this, null);
                 }
-                mDatePickerDialog.setSelectListener(this::initDate);
+                mDatePickerDialog.setSelectListener(this::initViewAndData);
                 mDatePickerDialog.show();
                 break;
             case R.id.btn_confirm:
@@ -237,15 +244,66 @@ public class FormActivity extends BaseActivity {
                 //直接扫码
                 useScan();
                 break;
+            case R.id.ic_setting:
+                startActivity(new Intent(FormActivity.this, SettingActivity.class));
+                break;
             default:
                 break;
         }
     }
 
-    private void initDate(long date) {
+    private void initViewAndData(long date) {
+        updateFormType();
         String dateString = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 .format(new Date(date));
         mTvDateContent.setText(dateString);
+        mRgTypeLayout.setOnCheckedChangeListener((group, checkedId) -> {
+            if(checkedId == R.id.rb_yt_btn){
+                mType = Constant.TYPE_YT;
+                updateFormType();
+            }else if(checkedId == R.id.rb_jt_btn){
+                mType = Constant.TYPE_JT;
+                updateFormType();
+            }
+        });
+        mTvNumberContent.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(s == null){
+                    return;
+                }
+                String number = s.toString();
+                if(number.contains("YT")){
+                    mRbYtBtn.setChecked(true);
+                }else if(number.contains("JT")){
+                    mRbJtBtn.setChecked(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+    }
+
+
+    private void updateFormType(){
+        if (mType == Constant.TYPE_YT) {
+            mTitleBar.setText("圆通面单归档");
+            mRbYtBtn.setChecked(true);
+        } else if (mType == Constant.TYPE_JT) {
+            mTitleBar.setText("极兔面单归档");
+            mRbJtBtn.setChecked(true);
+        } else {
+            Toast.makeText(this, "快递类型不支持", Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
     /**
@@ -385,6 +443,11 @@ public class FormActivity extends BaseActivity {
         String number = null;
         if (mTvNumberContent.getText() != null) {
             number = mTvNumberContent.getText().toString();
+        }else {
+            Toast.makeText(
+                    FormActivity.this,
+                    "请输入运单号", Toast.LENGTH_SHORT)
+                    .show();
         }
 
         Long date = System.currentTimeMillis();
@@ -441,7 +504,8 @@ public class FormActivity extends BaseActivity {
                         dialog.setOnClickListener(v -> {
                             mActionImage.setImageResource(R.drawable.bg_index);
                             mTvNumberContent.setText("");
-                            initDate(System.currentTimeMillis());
+                            mPhotoPath = null;
+                            initViewAndData(System.currentTimeMillis()-24*60*60*1000);
                         });
                         dialog.show();
 
